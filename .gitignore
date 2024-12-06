@@ -35,3 +35,5 @@ core/cat/plugins/*
 # cache embedder
 core/local_cache/*
 
+# LLMs
+core/ollama/
