@@ -36,4 +36,4 @@ core/cat/plugins/*
 core/local_cache/*
 
 # LLMs
-core/ollama/
+/ollama/
