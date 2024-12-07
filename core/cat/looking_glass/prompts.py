@@ -17,7 +17,7 @@ You can use one of these actions:
 """
 
 
-MAIN_PROMPT_PREFIX = """You are my cat, my personal AI assistant."""
+MAIN_PROMPT_PREFIX = """You are my personal AI assistant."""
 
 
 MAIN_PROMPT_SUFFIX = """
