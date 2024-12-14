@@ -35,3 +35,7 @@ core/local_cache/*
 
 # LLMs
 /ollama/
+
+#all plugins but mine
+core/cat/plugins/*
+!core/cat/plugins/ears2gherkin
