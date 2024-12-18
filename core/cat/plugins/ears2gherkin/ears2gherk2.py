@@ -7,8 +7,8 @@ from enum import Enum
 from cat.mad_hatter.decorators import tool, hook, plugin
 from cat.log import log
 
-# Directory e impostazioni (assicurati che nl2gherkin_dir sia definito nel tuo ambiente)
-nl2gherkin_dir = os.path.dirname(os.path.abspath(__file__)) # o il percorso corretto
+# Directory e impostazioni (fondamentale: definisci nl2gherkin_dir nel tuo ambiente)
+nl2gherkin_dir = os.path.dirname(os.path.abspath(__file__))  # O il percorso corretto
 os.environ['nl2gherkin_dir'] = nl2gherkin_dir
 
 class LanguageSelect(Enum):
@@ -68,7 +68,7 @@ def learn_excel_to_gherkin_ears(excel_file: str) -> Optional[List[Dict]]:
         gherkin_specifications = []
 
         for _, row in df.iterrows():
-            ears_text = str(row['EARS Requirement']) # Assumi che la colonna si chiami 'EARS Requirement'
+            ears_text = str(row['EARS Requirement'])  # Assumi che la colonna si chiami 'EARS Requirement'
             gherkin_content = ears_to_gherkin(ears_text)
 
             if gherkin_content:
@@ -93,7 +93,25 @@ def invoke_llm_to_learn_ears(examples: List[Dict], cat):
     prompt = """
     Guida alla Conversione di Requisiti EARS in Sintassi Gherkin
 
-    ... (Prompt completo come nella risposta precedente)
+    Questa guida ti aiuterà a convertire requisiti scritti in sintassi EARS in sintassi Gherkin. Vedrai esempi composti da INPUT e l'OUTPUT previsto in formato Gherkin.
+
+    Struttura dell'INPUT (EARS):
+    I requisiti EARS seguono tipicamente la forma: "The <Subject> <Modal Verb> <Action>".
+
+    Struttura dell'OUTPUT (Gherkin):
+    ```gherkin
+    Scenario: <Subject> <Action>
+      Given <Subject> exists
+      When the user performs <Action> (o una variazione a seconda del verbo modale)
+      Then the system shall/may/allows the user to <Action>
+    ```
+
+    Verbi Modali e Traduzione:
+    - MUST/SHOULD/WILL: "shall" nel Then.
+    - MAY: "may" nel Then.
+    - CAN: "allows the user to" nel Then.
+
+    Esempi:
     """
     try:
         i = 1
@@ -162,26 +180,11 @@ def agent_fast_reply(fast_reply, cat) -> Dict:
             if args[0].startswith("convert"):
                 _, *subargs = args[0].split(maxsplit=1)
                 if subargs:
-                    ears_text = " ".join(subargs) # Gestisce input con spazi
+                    ears_text = " ".join(subargs)
                     response = do_convert_ears_to_gherkin(ears_text, cat)
                     if response:
                         return {"output": response}
                     else:
-                        return {"output": "Conversione fallita."}
+                        return {"output": "Conversione fallita. Assicurati che il requisito EARS sia nel formato corretto (es. 'The system MUST do something')."}
                 else:
-                     return {"output": "Please, provide a EARS requirement to convert: ears convert \"The system MUST do something\""}
-
-            if args[0].startswith("train"):
-                response = train_ears_to_gherkin(excel_filename, cat)
-                return {"output": response}
-        else:
-            response = ("How to train the cat to convert EARS to gherkin:"
-                        "\nType: ears train"
-                        "\nHow to convert an EARS sentence:"
-                        "\nType: ears convert \"The system MUST do something\"")
-            return_direct = True
-
-    if return_direct:
-        return {"output": response}
-
-    return fast_reply
+                     return {"output": "Please, provide a EARS requirement to convert: ears convert \"
