@@ -8,7 +8,7 @@ from cat.mad_hatter.decorators import hook, plugin
 from cat.log import log
 from cat.looking_glass.cheshire_cat import CheshireCat
 
-cat = CheshireCat
+cat = CheshireCat()
 
 # Set the environment variable ‘ears2gherkin_dir’ to the directory where the plugin is located.
 ears2gherkin_dir = os.path.dirname(os.path.abspath(__file__))
@@ -261,13 +261,34 @@ def do_convert_nl_to_gherkin(excel_file_name: str, cat) -> str:
             prompt = f"""
 Convert EARS Requirements to Gherkin Scenarios
 
-Your task is to convert requirements written in EARS (Easy Approach to Requirements Syntax) into Gherkin scenarios. Follow the guidelines you learned during training and adhere to the structure and examples provided.
+Your task is to convert requirements written in EARS (Easy Approach to Requirements Syntax) into Gherkin scenarios. 
+
+EARS Syntax follows this basic structure:
+
+*  `SYS`:  A unique identifier for the system or feature.
+*  `WHERE`: Defines preconditions or the initial state.
+*  `WHEN`: Specifies the trigger event or action.
+*  `THEN`:  Describes the expected system response.
+
+Example EARS Requirement:
+SYS: Login
+WHERE the user is on the login page
+WHEN they enter valid credentials and click the "Login" button
+THEN the system SHALL redirect them to the home page
+
+Example Gherkin Scenario:
+Feature: Login
+Scenario: Successful login with valid credentials
+  Given the user is on the login page
+  When they enter valid credentials and click the "Login" button
+  Then the system should redirect them to the home page
+
 
 Input Structure
 
--   `SYS` (Feature ID): Directly corresponds to the "Feature:" in Gherkin.
--   `EARS`: The requirement in EARS syntax. This will be your primary source for creating the `Given`, `When`, `Then` steps.
--   `NATURAL`: A natural language description of the requirement. Use this to validate that your Gherkin output accurately reflects the requirement's meaning.
+-   `SYS` (Feature ID): Directly corresponds to the "Feature:" in Gherkin.
+-   `EARS`: The requirement in EARS syntax. This will be your primary source for creating the `Given`, `When`, `Then` steps.
+-   `NATURAL`: A natural language description of the requirement. Use this to validate that your Gherkin output accurately reflects the requirement's meaning.
 
 Output Structure
 
@@ -283,22 +304,22 @@ And [Additional outcome/constraint, if necessary]
 
 Conversion Steps
 
-1.  **Feature:** Use the `SYS` field directly after "Feature:".
-2.  **Scenario:** Create a brief description of the scenario based on the `EARS` requirement.
-3.  **Given:** Translate `WHERE` clauses from the `EARS` input into `Given` steps, establishing the initial context.
-4.  **When:** Convert `WHEN` or `IF` clauses into `When` steps, describing the trigger event.
-5.  **Then:** Map `THEN` clauses, especially those containing `SHALL`, to `Then` steps, outlining the expected system response.
-6.  **Validation:** Use the `NATURAL` field to ensure your Gherkin output aligns with the intended meaning of the requirement.
-7.  **Review:**
-    -   Ensure your output strictly adheres to Gherkin syntax.
-    -   Remove any comments or extraneous text. Your output should only contain the Gherkin scenario.
+1.  **Feature:** Use the `SYS` field directly after "Feature:".
+2.  **Scenario:** Create a brief description of the scenario based on the `EARS` requirement.
+3.  **Given:** Translate `WHERE` clauses from the `EARS` input into `Given` steps, establishing the initial context.
+4.  **When:** Convert `WHEN` or `IF` clauses into `When` steps, describing the trigger event.
+5.  **Then:** Map `THEN` clauses, especially those containing `SHALL`, to `Then` steps, outlining the expected system response.
+6.  **Validation:** Use the `NATURAL` field to ensure your Gherkin output aligns with the intended meaning of the requirement.
+7.  **Review:**
+    -   Ensure your output strictly adheres to Gherkin syntax.
+    -   Remove any comments or extraneous text. Your output should only contain the Gherkin scenario.
 
 Important Notes
 
--   **Do not add any conversational elements or markup** like "Here is the converted test case..." or "Note: I've followed the guidelines...". We want a pure Gherkin output.
--   **Focus on the EARS to Gherkin conversion rules you learned during training.**
+-   **Do not add any conversational elements or markup** like "Here is the converted test case..." or "Note: I've followed the guidelines...". We want a pure Gherkin output.
 
-Convert the following EARS requirement into a Gherkin scenario, strictly adhering to the rules and examples you have learned:
+
+Convert the following EARS requirement into a Gherkin scenario, strictly adhering to the rules and examples above:
 
 INPUT: {llm_input}"""
         
