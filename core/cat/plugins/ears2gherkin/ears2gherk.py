@@ -325,7 +325,7 @@ def agent_fast_reply(fast_reply, cat) -> Dict:
                 "How to train the cat to convert NL to Gherkin:\n"
                 "Type: ears2g train\n"
                 "How to convert a .xlsx file:\n"
-                "Type: ears2g convert"
+                "Type: ears2g converting"
             )
             return_direct = True
 

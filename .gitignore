@@ -39,3 +39,4 @@ core/local_cache/*
 #all plugins but mine
 core/cat/plugins/*
 !core/cat/plugins/ears2gherkin
+!core/cat/plugins/reqs2code
