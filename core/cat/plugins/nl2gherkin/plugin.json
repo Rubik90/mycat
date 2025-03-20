@@ -1,0 +1,10 @@
+{
+    "name": "nl2gherkin",
+    "description": "This plugin convert NL into gherkin.",
+    "author_name": "Rubik90",
+    "author_url": "https://github.com/Rubik90",
+    "plugin_url": "https://github.com/Rubik90/core-kinecat",
+    "tags": "core, kineton, gherkin",
+    "thumb": "https://github.com/Rubik90/core-kinecat/blob/main/core/cat/plugins/nl2gherkin/k.png?raw=true",
+    "version": "0.0.1"
+}

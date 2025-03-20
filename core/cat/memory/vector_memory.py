@@ -49,7 +49,7 @@ class VectorMemory:
         qdrant_host = get_env("CCAT_QDRANT_HOST")
 
         if not qdrant_host:
-            log.info(f"Qdrant path: {db_path}")
+            log.debug(f"Qdrant path: {db_path}")
             # Qdrant local vector DB client
 
             # reconnect only if it's the first boot and not a reload
@@ -82,3 +82,13 @@ class VectorMemory:
                 https=qdrant_https,
                 api_key=qdrant_api_key,
             )
+
+    def delete_collection(self, collection_name: str):
+        """Delete specific vector collection"""
+        
+        return self.vector_db.delete_collection(collection_name)
+    
+    def get_collection(self, collection_name: str):
+        """Get collection info"""
+        
+        return self.vector_db.get_collection(collection_name)

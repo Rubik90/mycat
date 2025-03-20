@@ -49,7 +49,7 @@ services:
     restart: unless-stopped
 
   ollama:
-    image: ollama/ollama:0.4.7
+    image: ollama/ollama:0.6.2
     container_name: ollama_cat
     restart: unless-stopped
     environment:
@@ -65,10 +65,10 @@ services:
       - ${OLLAMA_PORT:-11434}
     volumes:
       - ./ollama:/root/.ollama
-    #deploy:
-    #  resources:
-    #    reservations:
-    #      devices:
-    #        - driver: nvidia
-    #          count: all
-    #          capabilities: [gpu]
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
