@@ -1,26 +1,40 @@
-# Ears2Gherk
+# Reqs2Code
 
 [![awesome plugin](https://custom-icon-badges.demolab.com/static/v1?label=&message=awesome+plugin&color=383938&style=for-the-badge&logo=cheshire_cat_ai)](https://)  
-[![Awesome plugin](https://custom-icon-badges.demolab.com/static/v1?label=&message=Awesome+plugin&color=000000&style=for-the-badge&logo=cheshire_cat_ai)](https://)  
-[![awesome plugin](https://custom-icon-badges.demolab.com/static/v1?label=&message=awesome+plugin&color=F4F4F5&style=for-the-badge&logo=cheshire_cat_black)](https://)
 
-Write here all the useful information about your plugin.
+## Description
 
-This repository is the template to automate the release of official Cheshire Cat AI plugins. 
+Reqs2Code is a Cheshire Cat plugin that converts software requirements into code. It reads requirements from an Excel file and generates corresponding code files based on those requirements.
+
+## Features
+
+- Convert software requirements to code in multiple programming languages
+- Support for Python, Java, JavaScript, TypeScript, C#, C++, Go, and Rust
+- Save generated code to both Excel and individual files
+- Simple command interface for easy interaction
 
 ## Usage
 
-1. Create a new repository clicking on the `Use this template` button.
-2. Clone your new repo directly in the Cat's `plugins` folder.
-3. Run the `setup.py` script:
-```bash
-python setup.py
-```
-The script will prompt you to write the name of your plugin and make an initial setup setting the name in the files.
+1. Prepare an Excel file named `in_out.xlsx` with the following columns:
+   - ID: Unique identifier for each requirement
+   - REQUIREMENT: Description of the requirement
+   - GENERATED_CODE: (Optional) Will be populated with generated code
 
-4. Start developing!
+2. Place the Excel file in the plugin directory
 
-> **Important**
-> A new release of your plugin is triggered every time you set a new `version` in the `plugin.json` file.
-> Please, remember to set it correctly every time you want to release an update.
+3. Use the following commands to interact with the plugin:
+   - `req2code convert`: Convert requirements to code
+   - `req2code list`: List available programming languages
+   - `req2code set-lang <language>`: Set the target programming language
+   - `req2code help`: Show help information
+
+## Generated Files
+
+The plugin saves generated code in two places:
+1. In the Excel file under the GENERATED_CODE column
+2. As individual files in the `generated/<REQ_ID>/` directory
+
+## Configuration
+
+You can configure the target programming language using the `req2code set-lang` command followed by one of the supported languages.
 

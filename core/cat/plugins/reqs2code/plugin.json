@@ -1,10 +1,10 @@
 {
-    "name": "req2code",
+    "name": "reqs2code",
     "version": "0.0.1",
-    "description": "Description of ears2gherk.",
+    "description": "A plugin that converts software requirements into code.",
     "author_name": "Me",
     "author_url": "https://mywebsite.me",
-    "plugin_url": "https://github.com/my_name/ears2gherk",
-    "tags": "cat, template, example",
-    "thumb": "https://raw.githubusercontent.com/my_repo_path/ears2gherk.png"
+    "plugin_url": "https://github.com/my_name/reqs2code",
+    "tags": "requirements, code generation, software development",
+    "thumb": "https://raw.githubusercontent.com/my_repo_path/reqs2code.png"
 }

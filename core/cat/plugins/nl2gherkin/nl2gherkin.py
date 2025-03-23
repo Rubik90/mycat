@@ -30,44 +30,63 @@ def settings_schema():
 import pandas as pd
 from typing import Optional
 
+def load_excel_file(excel_path: str) -> Optional[pd.DataFrame]:
+    """Load and validate Excel file"""
+    try:
+        if not os.path.exists(excel_path):
+            log.error(f"Excel file not found: {excel_path}")
+            return None
+            
+        df = pd.read_excel(excel_path, sheet_name='Sheet1')
+        if df.empty:
+            log.error("Excel file is empty")
+            return None
+            
+        return df
+    except Exception as e:
+        log.error(f"Error reading Excel file {excel_path}: {e}")
+        return None
+
 def load_feature_file_from_excel(excel_file_path: str, file_id: str) -> Optional[str]:
     """Load the Gherkin Manual content from the Excel file"""
+    df = load_excel_file(excel_file_path)
+    if df is None:
+        return None
+        
     try:
-        # Load the Excel file
-        df = pd.read_excel(excel_file_path, sheet_name='Sheet1')
-        
-        # Find the row with the given file_id in the 'SDS' column
         row = df[df['SDS'] == file_id]
-        
         if row.empty:
             log.error(f"Feature file {file_id} not found in the Excel sheet")
             return None
         
-        # Get the content from the 'Gherkin_Manual' column
         content = row['Gherkin_Manual'].values[0]
-        
         if pd.isna(content) or not content.strip():
             log.error(f"Gherkin Manual for {file_id} is empty or missing")
             return None
         
         return content.strip()
-    except FileNotFoundError:
-        log.error(f"Excel file not found: {excel_file_path}")
     except Exception as e:
-        log.error(f"Error reading Excel file {excel_file_path}: {e}")
-    return None
+        log.error(f"Error processing row for {file_id}: {e}")
+        return None
 
 def learn_excel_to_gherkin(excel_file: str, feature_files_dir: str) -> Optional[List[Dict]]:
-    """Read the Excel file"""
+    """Process Excel file and extract Gherkin specifications"""
     excel_path = os.path.join(nl2gherkin_dir, excel_file)
+    df = load_excel_file(excel_path)
+    if df is None:
+        return None
     
     try:
-        df = pd.read_excel(excel_path)
-        
         gherkin_specifications = []
+        required_columns = ['SDS', 'STC', 'Procedure', 'Pass criteria', 'Description']
+        
+        for column in required_columns:
+            if column not in df.columns:
+                log.error(f"Required column '{column}' not found in Excel file")
+                return None
 
         for _, row in df.iterrows():
-            sds = str(row['SDS']).replace("\n", " ")
+            sds = str(row['SDS']).strip()
             feature_content = load_feature_file_from_excel(excel_path, sds)
 
             if not feature_content:
@@ -76,42 +95,50 @@ def learn_excel_to_gherkin(excel_file: str, feature_files_dir: str) -> Optional[
 
             example = {
                 'sds': sds,
-                'stc': str(row['STC']).replace("\n", " "),
-                'procedure': str(row.get('Procedure', '')),#.replace("\n", " "),
-                'pass_criteria': str(row.get('Pass criteria', 'Actuation')),#.replace("\n", " "),
-                'description': str(row.get('Description', 'Trigger')),#.replace("\n", " "),
-                #'trigger': str(row.get('Trigger', '')).replace("\n", ""),
-                #'actuation': str(row.get('Actuation', '')).replace("\n", ""),
+                'stc': str(row['STC']).strip(),
+                'procedure': str(row.get('Procedure', '')).strip(),
+                'pass_criteria': str(row.get('Pass criteria', 'Actuation')).strip(),
+                'description': str(row.get('Description', 'Trigger')).strip(),
                 'gherkin': feature_content
             }
             gherkin_specifications.append(example)
 
         return gherkin_specifications
-    except FileNotFoundError:
-        log.error(f"Excel file {excel_file} not found in {nl2gherkin_dir}")
-        return None
     except Exception as e:
-        log.error(f"Error during the reading of Excel file {excel_file}: {e}")
+        log.error(f"Error processing Excel file: {e}")
         return None
 
-def save_gherkin_scenario_to_excel(scenarios: List[str], feature_name: str) -> None:
+def save_gherkin_scenario_to_excel(scenarios: List[str], feature_name: str) -> bool:
     """Save multiple Gherkin scenarios under a single feature to the 'Gherkin_Model' column of the Excel file."""
+    if not scenarios or not feature_name:
+        log.error("Invalid input: scenarios list or feature name is empty")
+        return False
+
     try:
         excel_file = "example.xlsx"
-        # Load the Excel file
         excel_path = os.path.join(nl2gherkin_dir, excel_file)
-        df = pd.read_excel(excel_path, sheet_name='Sheet1')
+        
+        df = load_excel_file(excel_path)
+        if df is None:
+            return False
         
         # Parse and combine scenarios into a single string
-        parsed_scenarios = [parser(scenario) for scenario in scenarios]
+        parsed_scenarios = [parser(scenario) for scenario in scenarios if scenario]
+        if not parsed_scenarios:
+            log.error("No valid scenarios to save")
+            return False
+            
         combined_scenarios = "\n\n".join(parsed_scenarios)
 
         # Find the row with the given feature_name in the 'SDS' column
         row_index = df[df['SDS'] == feature_name].index
-        
         if row_index.empty:
             log.error(f"Feature name {feature_name} not found in the Excel sheet")
-            return
+            return False
+        
+        # Add 'Gherkin_Model' column if it doesn't exist
+        if 'Gherkin_Model' not in df.columns:
+            df['Gherkin_Model'] = ""
         
         # Update the 'Gherkin_Model' column for the found row
         df.at[row_index[0], 'Gherkin_Model'] = combined_scenarios
@@ -119,17 +146,34 @@ def save_gherkin_scenario_to_excel(scenarios: List[str], feature_name: str) -> N
         # Save the updated DataFrame back to the Excel file
         df.to_excel(excel_path, sheet_name='Sheet1', index=False)
         
-        log.info(f"Gherkin scenarios for {feature_name} saved successfully in the Excel file.")
-    except FileNotFoundError:
-        log.error(f"Excel file {excel_file} not found in {nl2gherkin_dir}")
+        log.info(f"Gherkin scenarios for {feature_name} saved successfully in the Excel file")
+        return True
     except Exception as e:
         log.error(f"Error saving Gherkin scenarios to Excel file {excel_file}: {e}")
+        return False
     
 def invoke_llm_to_learn(examples: List[Dict], cat) -> None:
     """Invoke the LLM to learn from provided data."""
+    if not examples:
+        log.warning("No examples provided for training")
+        return
 
+    try:
+        # Validate examples structure and content
+        for example in examples:
+            if not all(key in example for key in ['input', 'output']):
+                log.error("Invalid example structure: missing required fields")
+                return
+            if not example['input'] or not example['output']:
+                log.error("Invalid example content: empty input or output")
+                return
+            if not isinstance(example['input'], str) or not isinstance(example['output'], str):
+                log.error("Invalid example type: input and output must be strings")
+                return
+    except Exception as e:
+        log.error(f"Error while validationg examples structure and content {e}")
 
-    prompt = """
+        prompt = """
 Guide to Converting Test Cases into Gherkin Syntax
 This guide will help you learn how to convert test cases written in natural language into Gherkin syntax. You will see examples composed of INPUT and the expected OUTPUT in Gherkin format.
 
@@ -327,11 +371,25 @@ INPUT: {llm_input}
         log.error(f"Error during reading the Excel file: {e}")
         return "Conversion failed"
 
-def parser(combined_scenario: str) -> str:
-    feature_index = combined_scenario.find("Feature")
-    if feature_index != -1:
-        return combined_scenario[feature_index:]
-    return combined_scenario
+def parser(scenario: str) -> Optional[str]:
+    """Parse a Gherkin scenario to ensure proper formatting."""
+    if not scenario or not isinstance(scenario, str):
+        log.warning("Invalid scenario input: empty or not a string")
+        return None
+        
+    try:
+        # Remove extra whitespace and normalize line endings
+        parsed = scenario.strip().replace('\r\n', '\n').replace('\r', '\n')
+        
+        # Basic validation of Gherkin structure
+        if not any(keyword in parsed.lower() for keyword in ['feature:', 'scenario:', 'given', 'when', 'then']):
+            log.warning("Scenario appears to be missing required Gherkin keywords")
+            return None
+            
+        return parsed
+    except Exception as e:
+        log.error(f"Error parsing scenario: {e}")
+        return None
         
 @hook(priority=0)
 def agent_fast_reply(fast_reply, cat) -> Dict:
